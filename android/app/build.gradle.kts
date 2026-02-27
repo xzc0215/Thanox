@@ -211,8 +211,6 @@ dependencies {
     implementation(libs.lottie.compose)
     implementation(libs.lottie)
 
-    implementation(libs.xcrash.android.lib)
-
     implementation(libs.storage)
 
     implementation(project(":modules:module_common"))

@@ -36,7 +36,7 @@ xcrash-android-lib = "3.1.0"
 tinypinyin = "3.0.0"
 kotest-assertions = "5.9.1"
 libsu = "6.0.0"
-mmkv = "1.3.7" # LTS.
+mmkv = "2.3.0"
 orbit = "9.0.0"
 androidx-test-runner = "1.6.2"
 uiautomator = "2.3.0"
@@ -131,6 +131,7 @@ relinker = { module = "com.getkeepsafe.relinker:relinker", version.ref = "relink
 rxjava = { module = "io.reactivex.rxjava2:rxjava", version.ref = "rxjava" }
 storage = { module = "com.anggrayudi:storage", version.ref = "storage" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+# Does not support 16KB
 xcrash-android-lib = { module = "com.iqiyi.xcrash:xcrash-android-lib", version.ref = "xcrash-android-lib" }
 tinypinyin = { module = "com.github.promeg:tinypinyin", version.ref = "tinypinyin" }
 libsu-core = { module = "com.github.topjohnwu.libsu:core", version.ref = "libsu" }
