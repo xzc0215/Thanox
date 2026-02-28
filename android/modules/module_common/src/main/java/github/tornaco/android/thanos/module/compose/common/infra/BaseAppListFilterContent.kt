@@ -6,10 +6,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
@@ -81,6 +82,7 @@ import github.tornaco.android.thanos.module.compose.common.widget.SmallSpacer
 import github.tornaco.android.thanos.module.compose.common.widget.SortToolDropdown
 import github.tornaco.android.thanos.module.compose.common.widget.StandardSpacer
 import github.tornaco.android.thanos.module.compose.common.widget.SwitchBar
+import github.tornaco.android.thanos.module.compose.common.widget.ThanoxCardRoundedCornerShape
 import github.tornaco.android.thanos.module.compose.common.widget.ThanoxMediumAppBarScaffold
 import github.tornaco.android.thanos.module.compose.common.widget.rememberMenuDialogState
 import github.tornaco.android.thanos.module.compose.common.widget.rememberProgressDialogState
@@ -470,55 +472,61 @@ private fun SelectionModeToolbar(
         HorizontalFloatingToolbar(
             modifier = Modifier,
             expanded = true,
+            shape = ThanoxCardRoundedCornerShape,
             expandedShadowElevation = 0.dp,
-            leadingContent = {
-                Badge {
-                    Text("${uiState.selectedAppItems.size}")
-                }
-            },
             trailingContent = { },
             content = {
-                FlowRow {
-                    IconButton(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        onClick = {
-                            selectAll()
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Badge {
+                            Text("${uiState.selectedAppItems.size}")
                         }
-                    ) {
-                        Icon(Icons.Filled.SelectAll, contentDescription = null)
-                    }
-                    IconButton(
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                        onClick = {
-                            unselectAll()
-                        }
-                    ) {
-                        Icon(Icons.Filled.ClearAll, contentDescription = null)
-                    }
-                    val scope = rememberCoroutineScope()
-                    config.operations.forEach {
-                        val progressDialogState =
-                            rememberProgressDialogState(
-                                stringResource(R.string.title_batch_tools),
-                                it.title(LocalContext.current)
-                            )
-                        ProgressDialog(progressDialogState)
-                        Button(
+                        IconButton(
                             modifier = Modifier.padding(horizontal = 4.dp),
                             onClick = {
-                                scope.launch {
-                                    progressDialogState.show()
-                                    withContext(Dispatchers.IO) {
-                                        it.onClick(uiState.selectedAppItems)
-                                    }
-                                    opApplied()
-                                    progressDialogState.dismiss()
-                                }
+                                selectAll()
                             }
                         ) {
-                            Text(it.title(LocalContext.current))
+                            Icon(Icons.Filled.SelectAll, contentDescription = null)
+                        }
+                        IconButton(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            onClick = {
+                                unselectAll()
+                            }
+                        ) {
+                            Icon(Icons.Filled.ClearAll, contentDescription = null)
                         }
                     }
+
+                    Row(Modifier.horizontalScroll(rememberScrollState())) {
+                        val scope = rememberCoroutineScope()
+                        config.operations.forEach {
+                            val progressDialogState =
+                                rememberProgressDialogState(
+                                    stringResource(R.string.title_batch_tools),
+                                    it.title(LocalContext.current)
+                                )
+                            ProgressDialog(progressDialogState)
+                            Button(
+                                modifier = Modifier.padding(horizontal = 4.dp),
+                                onClick = {
+                                    scope.launch {
+                                        progressDialogState.show()
+                                        withContext(Dispatchers.IO) {
+                                            it.onClick(uiState.selectedAppItems)
+                                        }
+                                        opApplied()
+                                        progressDialogState.dismiss()
+                                    }
+                                }
+                            ) {
+                                Text(it.title(LocalContext.current))
+                            }
+                        }
+                    }
+
+
                 }
             }
         )

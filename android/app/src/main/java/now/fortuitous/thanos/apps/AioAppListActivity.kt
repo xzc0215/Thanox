@@ -13,6 +13,7 @@ import github.tornaco.android.thanos.core.app.activity.ActivityStackSupervisor
 import github.tornaco.android.thanos.core.pm.AppInfo
 import github.tornaco.android.thanos.core.pm.Pkg
 import github.tornaco.android.thanos.core.secure.PrivacyManager
+import github.tornaco.android.thanos.core.profile.ProfileManager
 import github.tornaco.android.thanos.module.compose.common.infra.AppBarConfig
 import github.tornaco.android.thanos.module.compose.common.infra.AppItemConfig
 import github.tornaco.android.thanos.module.compose.common.infra.AppUiModel
@@ -81,6 +82,8 @@ class AioAppListActivity : BaseAppListFilterActivity() {
     private val appsManagerConfig: BaseAppListFilterContainerConfig
         get() {
             val pm = ThanosManager.from(this).pkgManager
+            val profileManager: ProfileManager? = ThanosManager.from(this).profileManager
+            val templates = profileManager?.allConfigTemplates.orEmpty()
             return BaseAppListFilterContainerConfig(
                 featureId = "AppsManageActivity2",
                 appBarConfig = AppBarConfig(
@@ -106,24 +109,46 @@ class AioAppListActivity : BaseAppListFilterActivity() {
                         })
                 ),
                 batchOperationConfig = BatchOperationConfig(
-                    operations = listOf(
-                        BatchOperationConfig.Operation(
-                            title = { it.getString(R.string.freeze) },
-                            onClick = { models ->
-                                models.forEach {
-                                    pm.setApplicationEnableState(Pkg.fromAppInfo(it.appInfo), false, true);
+                    operations = buildList {
+                        add(
+                            BatchOperationConfig.Operation(
+                                title = { it.getString(R.string.freeze) },
+                                onClick = { models ->
+                                    models.forEach {
+                                        pm.setApplicationEnableState(Pkg.fromAppInfo(it.appInfo), false, true)
+                                    }
                                 }
-                            }
-                        ),
-                        BatchOperationConfig.Operation(
-                            title = { it.getString(R.string.temp_unfreeze) },
-                            onClick = { models ->
-                                models.forEach {
-                                    pm.setApplicationEnableState(Pkg.fromAppInfo(it.appInfo), true, true);
+                            )
+                        )
+                        add(
+                            BatchOperationConfig.Operation(
+                                title = { it.getString(R.string.temp_unfreeze) },
+                                onClick = { models ->
+                                    models.forEach {
+                                        pm.setApplicationEnableState(Pkg.fromAppInfo(it.appInfo), true, true)
+                                    }
                                 }
-                            }
-                        ),
-                    )
+                            )
+                        )
+
+                        templates.forEach { template ->
+                            add(
+                                BatchOperationConfig.Operation(
+                                    title = {
+                                        it.getString(R.string.pref_action_apply_config_template) + ": " + template.title
+                                    },
+                                    onClick = { models ->
+                                        models.forEach { model ->
+                                            profileManager?.applyConfigTemplateForPackage(
+                                                Pkg.fromAppInfo(model.appInfo),
+                                                template
+                                            )
+                                        }
+                                    }
+                                )
+                            )
+                        }
+                    }
                 )
             )
         }
