@@ -41,6 +41,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +78,7 @@ import github.tornaco.android.thanos.module.compose.common.widget.MediumSpacer
 import github.tornaco.android.thanos.module.compose.common.widget.MenuItem
 import github.tornaco.android.thanos.module.compose.common.widget.SmallSpacer
 import github.tornaco.android.thanos.module.compose.common.widget.StandardSpacer
+import github.tornaco.android.thanos.module.compose.common.widget.ThanoxCardRoundedCornerShape
 import github.tornaco.android.thanos.module.compose.common.widget.ThanoxMediumAppBarScaffold
 import github.tornaco.android.thanos.module.compose.common.widget.TinySpacer
 import github.tornaco.android.thanos.module.compose.common.widget.clickableWithRipple
@@ -152,7 +154,8 @@ private fun RunningAppStateDetailsScreen(
                         modifier = Modifier.padding(16.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = LocalThanoxColorSchema.current.cardBgColor
-                        )
+                        ),
+                        shape = ThanoxCardRoundedCornerShape
                     ) {
                         Column {
                             StandardSpacer()
@@ -162,7 +165,11 @@ private fun RunningAppStateDetailsScreen(
                                 cpuUsageStatsState,
                                 viewModel
                             )
-                            StandardSpacer()
+
+                            MediumSpacer()
+                            HorizontalDivider()
+                            MediumSpacer()
+
                             ServiceSection(runningAppState, runningProcessState, viewModel)
                             StandardSpacer()
                         }
@@ -243,7 +250,7 @@ private fun ServiceTile(
     ) {
         Spacer(modifier = Modifier.size(12.dp))
         Row(verticalAlignment = CenterVertically) {
-            AppIcon(modifier = Modifier.size(42.dp), appInfo = runningAppState.appInfo)
+            AppIcon(modifier = Modifier.size(36.dp), appInfo = runningAppState.appInfo)
             Spacer(modifier = Modifier.size(8.dp))
             Column(verticalArrangement = Arrangement.Center) {
                 AppLabelText(appLabel = service.serviceLabel)
@@ -420,6 +427,7 @@ private fun ProcessSection(
                     style = MaterialTheme.typography.titleLarge
                 )
 
+                StandardSpacer()
                 Row(modifier = Modifier.alignByBaseline(), verticalAlignment = CenterVertically) {
                     Text(
                         text = " (id: ${runningProcessState.process.pid})",
@@ -436,7 +444,7 @@ private fun ProcessSection(
             Spacer(modifier = Modifier.size(12.dp))
 
             Row(verticalAlignment = CenterVertically) {
-                AppIcon(modifier = Modifier.size(42.dp), appInfo = appInfo)
+                AppIcon(modifier = Modifier.size(36.dp), appInfo = appInfo)
                 Spacer(modifier = Modifier.size(8.dp))
                 Column(verticalArrangement = Arrangement.Center) {
                     AppLabelText(appLabel = runningProcessState.process.processName)
