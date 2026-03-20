@@ -291,7 +291,7 @@ private fun AppBarBadges(
             onNeedRestartClick()
         }
     }
-    if (state.hasFrameworkError) {
+    if (state.hasFrameworkError && false) {
         ClickableBadge(text = stringResource(id = github.tornaco.android.thanos.res.R.string.badge_framework_err)) {
             onFrameworkErrorClick()
         }
