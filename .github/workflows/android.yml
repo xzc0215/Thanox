@@ -1,4 +1,4 @@
-name: Build Thanox APK (Fixed Android Dir)
+name: Build Thanox APK (OSS Version)
 
 on:
   workflow_dispatch:
@@ -11,13 +11,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        submodules: recursive # Thanox 包含多個子模組，建議加上這個確保源碼完整
+        submodules: false # 徹底禁用子模組，防止報錯
 
     - name: Setup JDK 21
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '21' # 修改為 21 以匹配 build.gradle.kts 的設定
+        java-version: '21'
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
@@ -26,14 +26,14 @@ jobs:
       working-directory: android
       run: chmod +x gradlew
 
-    # 👇 修改這裡：明確指定編譯 prcDebug 變體，匹配我們剛才修改的依賴策略
     - name: Build Prc Debug APK
       working-directory: android
+      # 使用 --continue 是為了在缺少私有類時，盡可能暴露出所有需要註釋掉的地方
       run: ./gradlew :app:assemblePrcDebug --stacktrace
-
+      
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: thanox-prc-debug-apk
+        name: thanox-oss-apk
         path: |
           android/app/build/outputs/apk/prc/debug/*.apk
