@@ -10,28 +10,30 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+      with:
+        submodules: recursive # Thanox 包含多個子模組，建議加上這個確保源碼完整
 
-    - name: Setup JDK 17
+    - name: Setup JDK 21
       uses: actions/setup-java@v4
       with:
-        distribution: temurin
-        java-version: 17
+        distribution: 'temurin'
+        java-version: '21' # 修改為 21 以匹配 build.gradle.kts 的設定
 
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
-    # 👇 关键：进入 android 目录
     - name: Grant gradlew permission
       working-directory: android
       run: chmod +x gradlew
 
-    - name: Build Debug APK
+    # 👇 修改這裡：明確指定編譯 prcDebug 變體，匹配我們剛才修改的依賴策略
+    - name: Build Prc Debug APK
       working-directory: android
-      run: ./gradlew assembleDebug
+      run: ./gradlew :app:assemblePrcDebug --stacktrace
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: thanox-apk
+        name: thanox-prc-debug-apk
         path: |
-          android/**/build/outputs/apk/debug/*.apk
+          android/app/build/outputs/apk/prc/debug/*.apk
