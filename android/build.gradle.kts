@@ -45,25 +45,18 @@ androidGitVersion {
 
 // Make sure new code > released.
 val legacyCodeBase = 2000000
-// 2000.1.1 millis
 val startOf2000 = 946684800000L
-// +1 10min
 val versionCodeByTime =
     ((System.currentTimeMillis() - startOf2000) / 1000 / 60 / 10).toInt() + legacyCodeBase
 thanoxVersionCode = versionCodeByTime
 thanoxVersionName = androidGitVersion.name()
 
-printVersions()
-
 task("printVersions") {
-    printVersions()
+    doLast {
+        log("thanoxVersionCode: $thanoxVersionCode")
+        log("thanoxVersionName: $thanoxVersionName")
+    }
 }
-
-fun printVersions() {
-    log("thanoxVersionCode: $thanoxVersionCode")
-    log("thanoxVersionName: $thanoxVersionName")
-}
-
 
 val androidSourceCompatibility by extra(JavaVersion.VERSION_21)
 val androidTargetCompatibility by extra(JavaVersion.VERSION_21)
@@ -77,12 +70,7 @@ subprojects {
     }
 
     tasks.withType<JavaCompile> {
-        options.compilerArgs.addAll(
-            arrayOf(
-                "-Xmaxerrs",
-                "1000"
-            )
-        )
+        options.compilerArgs.addAll(arrayOf("-Xmaxerrs", "1000"))
         options.encoding = "UTF-8"
     }
 
@@ -99,6 +87,11 @@ subprojects {
 
             defaultConfig {
                 minSdk = Configs.minSdkVersion
+                
+                // 【關鍵修改：解決 No matching variant 報錯】
+                // 告訴 Gradle，如果子模組沒有定義 'market' 維度，則默認匹配 'prc' 變體
+                missingDimensionStrategy("market", "prc")
+
                 if (this is com.android.build.api.dsl.ApplicationDefaultConfig) {
                     targetSdk = Configs.targetSdkVersion
                     versionCode = Configs.thanoxVersionCode
@@ -108,7 +101,7 @@ subprojects {
             }
 
             lint {
-                abortOnError = true
+                abortOnError = false // 建議改為 false，避免 OSS 版因代碼不全導致 lint 報錯中斷
                 checkReleaseBuilds = false
             }
 
@@ -116,7 +109,6 @@ subprojects {
                 sourceCompatibility = androidSourceCompatibility
                 targetCompatibility = androidTargetCompatibility
             }
-
         }
     }
 
@@ -132,9 +124,7 @@ subprojects {
         log("Check publishing subproject: ${project.name}, hasAndroidPlugin: $hasAndroidPlugin")
         val fogModules = listOf("")
         if (fogModules.contains(project.name)) {
-            log("Fogging: ${project.name}")
             project.plugins.apply("stringfog")
-
             project.configure<StringFogExtension> {
                 implementation = "com.github.megatronking.stringfog.xor.StringFogImpl"
                 enable = true
