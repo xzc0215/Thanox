@@ -21,20 +21,15 @@ buildscript {
 plugins {
     alias(libs.plugins.agp.lib) apply false
     alias(libs.plugins.agp.app) apply false
-
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.kotlin.android) apply false
     alias(libs.plugins.kotlin.kapt) apply false
     alias(libs.plugins.kotlin.parcelize) apply false
     alias(libs.plugins.dagger.hilt.android) apply false
-
     alias(libs.plugins.protobuf.gradle.plugin) apply false
     alias(libs.plugins.gmazzo.buildconfig) apply false
-
     alias(libs.plugins.gladed.androidgitversion) apply true
-
     alias(libs.plugins.compose.compiler) apply false
-
     id("thanox-proj")
 }
 
@@ -43,26 +38,16 @@ androidGitVersion {
     codeFormat = "MNPBB"
 }
 
-// Make sure new code > released.
 val legacyCodeBase = 2000000
 val startOf2000 = 946684800000L
-val versionCodeByTime =
-    ((System.currentTimeMillis() - startOf2000) / 1000 / 60 / 10).toInt() + legacyCodeBase
+val versionCodeByTime = ((System.currentTimeMillis() - startOf2000) / 1000 / 60 / 10).toInt() + legacyCodeBase
 thanoxVersionCode = versionCodeByTime
 thanoxVersionName = androidGitVersion.name()
-
-task("printVersions") {
-    doLast {
-        log("thanoxVersionCode: $thanoxVersionCode")
-        log("thanoxVersionName: $thanoxVersionName")
-    }
-}
 
 val androidSourceCompatibility by extra(JavaVersion.VERSION_21)
 val androidTargetCompatibility by extra(JavaVersion.VERSION_21)
 
 subprojects {
-    log("subprojects: ${this.name}")
     repositories {
         google()
         mavenCentral()
@@ -79,60 +64,21 @@ subprojects {
             compileSdk = Configs.compileSdkVersion
             ndkVersion = Configs.ndkVersion
 
-            externalNativeBuild {
-                cmake {
-                    version = "3.22.1+"
-                }
-            }
-
             defaultConfig {
                 minSdk = Configs.minSdkVersion
-                
-                // 【關鍵修改：解決 No matching variant 報錯】
-                // 告訴 Gradle，如果子模組沒有定義 'market' 維度，則默認匹配 'prc' 變體
+                // 💡 關鍵修復：解決子模組渠道匹配問題
                 missingDimensionStrategy("market", "prc")
 
                 if (this is com.android.build.api.dsl.ApplicationDefaultConfig) {
                     targetSdk = Configs.targetSdkVersion
                     versionCode = Configs.thanoxVersionCode
                     versionName = Configs.thanoxVersionName
-                    testInstrumentationRunner = Configs.testRunner
                 }
-            }
-
-            lint {
-                abortOnError = false // 建議改為 false，避免 OSS 版因代碼不全導致 lint 報錯中斷
-                checkReleaseBuilds = false
             }
 
             compileOptions {
                 sourceCompatibility = androidSourceCompatibility
                 targetCompatibility = androidTargetCompatibility
-            }
-        }
-    }
-
-    plugins.withType(JavaPlugin::class.java) {
-        extensions.configure(JavaPluginExtension::class.java) {
-            sourceCompatibility = androidSourceCompatibility
-            targetCompatibility = androidTargetCompatibility
-        }
-    }
-
-    project.afterEvaluate {
-        val hasAndroidPlugin = project.plugins.hasPlugin(AndroidBasePlugin::class)
-        log("Check publishing subproject: ${project.name}, hasAndroidPlugin: $hasAndroidPlugin")
-        val fogModules = listOf("")
-        if (fogModules.contains(project.name)) {
-            project.plugins.apply("stringfog")
-            project.configure<StringFogExtension> {
-                implementation = "com.github.megatronking.stringfog.xor.StringFogImpl"
-                enable = true
-                kg = com.github.megatronking.stringfog.plugin.kg.RandomKeyGenerator()
-                mode = com.github.megatronking.stringfog.plugin.StringFogMode.bytes
-            }
-            project.dependencies {
-                add("implementation", libs.stringfog.xor)
             }
         }
     }
